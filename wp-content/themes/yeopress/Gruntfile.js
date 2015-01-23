@@ -1,37 +1,41 @@
 module.exports = function(grunt) {
 
-	// To support SASS/SCSS or Stylus, just install
-	// the appropriate grunt package and it will be automatically included
-	// in the build process, Sass is included by default:
-	//
-	// * for SASS/SCSS support, run `npm install --save-dev grunt-contrib-sass`
-	// * for Stylus/Nib support, `npm install --save-dev grunt-contrib-stylus`
-
 	var npmDependencies = require('./package.json').devDependencies;
-	var hasSass = npmDependencies['grunt-contrib-sass'] !== undefined;
-	var hasStylus = npmDependencies['grunt-contrib-stylus'] !== undefined;
-
+	var jsFileList = [
+			'js/vendor/owl.carousel/dist/owl.carousel.min.js',
+			'js/vendor/progressbar.js/dist/progressbar.min.js',
+			'js/scripts/jquery.fancybox.pack.js',
+			'js/scripts/masked-input.js',
+			'js/scripts/equal-heights.js',
+			'js/utils.js',
+			'js/_map/infobox.js',
+			'js/_map/main.js',
+			'js/sprite-animation.js',
+			'js/footer.js',
+			'js/slider.js',
+			'js/scroll.js',
+			'js/map-simple.js',
+			'js/instagram.js',
+			'js/random-logos.js',
+			'js/general.js',
+			'js/survey.js',
+			'js/home.js',
+			'js/partners.js',
+			'js/talk-to-us.js',
+			'js/page-find.js'
+		  ];
+		  
 	grunt.initConfig({
-
 		// Watches for changes and runs tasks
 		watch : {
-			sass : {
-				files : ['scss/**/*.scss'],
-				tasks : (hasSass) ? ['sass:dev'] : null,
-				options : {
-					livereload : true
-				}
-			},
-			stylus : {
-				files : ['stylus/**/*.styl'],
-				tasks : (hasStylus) ? ['stylus:dev'] : null,
-				options: {
-					livereload : true
-				}
-			},
+			sass: {
+				files : ['scss/{,*/}*.scss'],
+	            tasks: ['sass:dev']
+	        },
+
 			js : {
-				files : ['js/**/*.js'],
-				tasks : ['jshint'],
+				files : jsFileList,
+				tasks: ['jshint', 'concat:dist'],
 				options : {
 					livereload : true
 				}
@@ -46,7 +50,7 @@ module.exports = function(grunt) {
 
 		// JsHint your javascript
 		jshint : {
-			all : ['js/*.js', '!js/modernizr.js', '!js/*.min.js', '!js/vendor/**/*.js'],
+			all : ['js/source/*.js'],
 			options : {
 				browser: true,
 				curly: false,
@@ -62,88 +66,48 @@ module.exports = function(grunt) {
 			}
 		},
 
-		// Dev and production build for sass
-		sass : {
-			production : {
-				files : [
-					{
-						src : ['**/*.scss', '!**/_*.scss'],
-						cwd : 'scss',
-						dest : 'css',
-						ext : '.css',
-						expand : true
-					}
-				],
-				options : {
-					style : 'compressed'
-				}
-			},
-			dev : {
-				files : [
-					{
-						src : ['**/*.scss', '!**/_*.scss'],
-						cwd : 'scss',
-						dest : 'css',
-						ext : '.css',
-						expand : true
-					}
-				],
-				options : {
-					style : 'expanded'
-				}
-			}
-		},
+		sass: {
+			options: {                      // dictionary of render options
+	            sourceMap: true,
+	            includePaths: require('node-bourbon').includePaths
+	        },
+            production: {
+                options: {
+                    outputStyle: 'compressed'
+                },
+                files: {
+	            	'css/global.css': 'scss/main.scss'
+	         	}
+            },
+            dev: {
+            	 files: {
+	             'css/global.css': 'scss/main.scss'
+	          }
+            }
+        },
 
-		// Dev and production build for stylus
-		stylus : {
-			production : {
-				files : [
-					{
-						src : ['**/*.styl', '!**/_*.styl'],
-						cwd : 'stylus',
-						dest : 'css',
-						ext: '.css',
-						expand : true
-					}
-				],
-				options : {
-					compress : true
-				}
-			},
-			dev : {
-				files : [
-					{
-						src : ['**/*.styl', '!**/_*.styl'],
-						cwd : 'stylus',
-						dest : 'css',
-						ext: '.css',
-						expand : true
-					}
-				],
-				options : {
-					compress : false
-				}
-			},
-		},
 
-		// Bower task sets up require config
-		bower : {
-			all : {
-				rjsConfig : 'js/global.js'
-			}
-		},
+        concat: {
+			options: {
+				separator: ';',
+				},
+			dist: {
+				src:  jsFileList,
+				dest: 'js/global.js',
+			},
+	    },
 
-		// Require config
-		requirejs : {
-			production : {
-				options : {
-					name : 'global',
-					baseUrl : 'js',
-					mainConfigFile : 'js/global.js',
-					out : 'js/optimized.min.js'
-				}
-			}
-		},
+	    // concatenation and minification all in one
+        uglify: {
+            dist: {
+                files: {
+                    'js/global.js': [
+                        'js/global.js'
+                    ]
+                }
+            }
+        },
+
 
 		// Image min
 		imagemin : {
@@ -179,21 +143,7 @@ module.exports = function(grunt) {
 	grunt.registerTask('default', ['watch']);
 
 	// Build task
-	grunt.registerTask('build', function() {
-		var arr = ['jshint'];
-
-		if (hasSass) {
-			arr.push('sass:production');
-		}
-
-		if (hasStylus) {
-			arr.push('stylus:production');
-		}
-
-		arr.push('imagemin:production', 'svgmin:production', 'requirejs:production');
-
-		return arr;
-	});
+	grunt.registerTask('build', ['jshint', 'imagemin:production', 'svgmin:production', 'concat', 'uglify', 'sass:production']);
 
 	// Template Setup Task
 	grunt.registerTask('setup', function() {
@@ -209,22 +159,17 @@ module.exports = function(grunt) {
 
 		arr.push('bower-install');
 	});
-
-	// Load up tasks
-	if (hasSass) {
-		grunt.loadNpmTasks('grunt-contrib-sass');
-	}
-
-	if (hasStylus) {
-		grunt.loadNpmTasks('grunt-contrib-stylus');
-	}
+	
 	
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-bower-requirejs');
 	grunt.loadNpmTasks('grunt-contrib-requirejs');
 	grunt.loadNpmTasks('grunt-contrib-imagemin');
+	grunt.loadNpmTasks('grunt-contrib-concat');
+	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-svgmin');
+	grunt.loadNpmTasks('grunt-sass');
 
 	// Run bower install
 	grunt.registerTask('bower-install', function() {
