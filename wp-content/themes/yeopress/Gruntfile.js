@@ -2,27 +2,8 @@ module.exports = function(grunt) {
 
 	var npmDependencies = require('./package.json').devDependencies;
 	var jsFileList = [
-			'js/vendor/owl.carousel/dist/owl.carousel.min.js',
-			'js/vendor/progressbar.js/dist/progressbar.min.js',
-			'js/scripts/jquery.fancybox.pack.js',
-			'js/scripts/masked-input.js',
-			'js/scripts/equal-heights.js',
-			'js/utils.js',
-			'js/_map/infobox.js',
-			'js/_map/main.js',
-			'js/sprite-animation.js',
-			'js/footer.js',
-			'js/slider.js',
-			'js/scroll.js',
-			'js/map-simple.js',
-			'js/instagram.js',
-			'js/random-logos.js',
-			'js/general.js',
-			'js/survey.js',
-			'js/home.js',
-			'js/partners.js',
-			'js/talk-to-us.js',
-			'js/page-find.js'
+			'js/ ----- .js', //list all js files here
+			
 		  ];
 		  
 	grunt.initConfig({
