@@ -11,4 +11,4 @@
 	- Use `grunt build` to build deployment version
 
 
-
+* Add new javascript files to Gruntfile.js  `jsFileList` array. They will be concated to a single `global.js` file.
