@@ -1,3 +1,5 @@
+## Instructions
+
 * Edit `/local-config.php` with your local informations. Add it to .gitignore.
 
 * Edit `/wp-config` with your server db informations.
